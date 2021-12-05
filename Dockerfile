@@ -6,7 +6,7 @@ ARG BASE_IMAGE=rust:slim-buster
 # Our first FROM statement declares the build environment.
 FROM ${BASE_IMAGE} AS builder
 
-RUN apt update && apt install -y build-essential cmake libsasl2-dev
+RUN apt update && apt install -y build-essential cmake libsasl2-dev zlib1g-dev
 RUN update-ca-certificates
 
 # Create appuser
@@ -33,6 +33,8 @@ RUN cargo build --release
 ## Final image
 ####################################################################################################
 FROM debian:buster-slim
+
+RUN apt update && apt install -y zlib1g-dev
 
 # Import from builder.
 COPY --from=builder /etc/passwd /etc/passwd

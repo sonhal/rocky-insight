@@ -1,1 +1,5 @@
 certs/
+.idea
+.github
+target
+docker-compose*
