@@ -1,0 +1,71 @@
+version: '3'
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: "confluentinc/cp-zookeeper:7.0.0"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://zookeeper:2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka:
+    container_name: kafka
+    image: "confluentinc/cp-kafka:7.0.0"
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    restart: on-failure
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+    command: "sh -c '/etc/confluent/docker/run'"
+
+#  broker:
+#    image: confluentinc/cp-kafka:7.0.0
+#    container_name: broker
+#    ports:
+#      - "29092:29092"
+#      - "9092:9092"
+#      - "9101:9101"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+#      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+#      KAFKA_JMX_PORT: 9101
+#      KAFKA_JMX_HOSTNAME: localhost
+#      KAFKA_PROCESS_ROLES: 'broker,controller'
+#      KAFKA_NODE_ID: 1
+#      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+#      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://localhost:9092'
+#      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+#      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+#      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+#    volumes:
+#      - ./docker_compose_update_run.sh:/tmp/update_run.sh
+#    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
+
+  kafka-ui:
+      container_name: kafka-ui
+      image: "obsidiandynamics/kafdrop"
+      ports:
+        - "9000:9000"
+      environment:
+        KAFKA_BROKERCONNECT: "kafka:9092"
+        JVM_OPTS: "-Xms32M -Xmx64M"
+        SERVER_SERVLET_CONTEXTPATH: "/"
+      restart: on-failure
+      depends_on:
+        - broker
