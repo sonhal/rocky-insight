@@ -11,7 +11,7 @@ RUN update-ca-certificates
 
 # Create appuser
 ENV USER=rocky
-ENV UID=10001
+ENV UID=1000
 
 RUN adduser \
     --disabled-password \
