@@ -3,7 +3,7 @@ use rdkafka::ClientConfig;
 
 pub(crate) type RapidConsumer = StreamConsumer<DefaultConsumerContext>;
 
-const GROUP_ID: &str = "cg-rocky-insight-2";
+const GROUP_ID: &str = "cg-rocky-insight-1";
 
 pub fn create_consumer(bootstrap_servers: &str, topic: &str) -> RapidConsumer {
     let consumer: RapidConsumer = ClientConfig::new()

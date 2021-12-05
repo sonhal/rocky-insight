@@ -31,9 +31,7 @@ const TOPIC: &str = "osquery_topic";
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder()
-        .filter_level(LevelFilter::Debug)
-        .try_init();
+    env_logger::try_init();
 
     let config = Config::from_env();
     info!("Rocky Insight starting with config = {:#?}", config);
