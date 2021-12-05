@@ -1,0 +1,36 @@
+name: Rust
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  set_version:
+    name: set image name
+    runs-on: ubuntu-latest
+    steps:
+      - name: create docker tag
+        run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+    outputs:
+      image: ghcr.io/${{ github.repository }}/rocky-insight:${{ env.TAG }}
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+    - name: build docker image
+      run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
+    - name: push docker image
+      run: |
+        docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} https://ghcr.io/
+        docker push ${{ needs.set_version.outputs.image }}
